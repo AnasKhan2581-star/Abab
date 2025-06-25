@@ -2,38 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Happy Monthsary!</title>
+  <title>Happy Monthsary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
     body {
       background-color: white;
+      color: #8B008B;
       font-family: 'Arial', sans-serif;
-      color: #8B008B; /* Dark Magenta */
       text-align: center;
-      padding: 30px;
+      padding: 20px;
+      margin: 0;
     }
+
     h1 {
-      font-size: 2em;
+      font-size: 1.8em;
       margin-bottom: 20px;
       color: #8B008B;
     }
+
     table {
       margin: 0 auto;
       border-collapse: collapse;
+      table-layout: fixed;
+      width: 100%;
+      max-width: 480px;
     }
+
     td {
       border: 1px solid #8B008B;
-      width: 40px;
-      height: 40px;
       text-align: center;
-      font-size: 20px;
+      font-size: 16px;
+      width: 8.33%;
+      height: 40px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s;
     }
+
     td.selected {
       background-color: #8B008B;
       color: white;
     }
+
     .popup {
       display: none;
       position: fixed;
@@ -45,9 +55,21 @@
       padding: 30px;
       border: 3px solid #8B008B;
       border-radius: 15px;
-      font-size: 20px;
-      z-index: 1000;
+      font-size: 18px;
+      max-width: 90%;
       box-shadow: 0 0 15px #8B008B55;
+      z-index: 100;
+    }
+
+    @media (max-width: 500px) {
+      td {
+        height: 35px;
+        font-size: 14px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
     }
   </style>
 </head>
@@ -55,80 +77,111 @@
 
   <h1>FIND 5 WORDS</h1>
   <table id="puzzle"></table>
-
-  <div class="popup" id="popup">
-    💌 Happy 28th monthsary my cutu ❤️
-  </div>
+  <div class="popup" id="popup">💌 Happy 28th monthsary my cutu ❤️</div>
 
   <script>
-    const puzzleData = [
-      ['b','a','c','h','c','h','a','x','x'],
-      ['x','x','x','x','x','x','x','x','x'],
-      ['x','x','x','x','x','x','x','x','x'],
-      ['x','x','x','x','x','x','x','x','x'],
-      ['l','i','f','e','x','x','x','x','x'],
-      ['x','x','x','x','x','x','x','x','x'],
-      ['x','x','c','u','t','u','x','x','x'],
-      ['x','x','x','x','x','x','j','a','a'],
-      ['x','x','x','x','x','x','x','x','n']
-    ];
+    const gridSize = 12;
+    const words = ['life', 'cutu', 'jaan', 'everything', 'bachcha'];
+    const foundWords = new Set();
+    const puzzleElement = document.getElementById('puzzle');
 
-    const wordsToFind = ["life", "cutu", "jaan", "everything", "bachcha"];
-    let foundWords = [];
+    // Create empty grid
+    const grid = Array.from({ length: gridSize }, () =>
+      Array.from({ length: gridSize }, () => '')
+    );
 
-    const puzzle = document.getElementById('puzzle');
+    // Place a word in the grid
+    function placeWord(word) {
+      let placed = false;
+      while (!placed) {
+        const dir = Math.floor(Math.random() * 2); // 0 = horizontal, 1 = vertical
+        const row = Math.floor(Math.random() * gridSize);
+        const col = Math.floor(Math.random() * gridSize);
 
-    // Render puzzle
-    for (let i = 0; i < 9; i++) {
-      const row = document.createElement('tr');
-      for (let j = 0; j < 9; j++) {
+        if (dir === 0 && col + word.length <= gridSize) {
+          if (grid[row].slice(col, col + word.length).every(c => c === '')) {
+            for (let i = 0; i < word.length; i++) grid[row][col + i] = word[i];
+            placed = true;
+          }
+        } else if (dir === 1 && row + word.length <= gridSize) {
+          if (grid.slice(row, row + word.length).every(r => r[col] === '')) {
+            for (let i = 0; i < word.length; i++) grid[row + i][col] = word[i];
+            placed = true;
+          }
+        }
+      }
+    }
+
+    // Place all words
+    words.forEach(placeWord);
+
+    // Fill the rest with random letters
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        if (grid[r][c] === '') {
+          grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+        }
+      }
+    }
+
+    // Render grid
+    for (let r = 0; r < gridSize; r++) {
+      const rowEl = document.createElement('tr');
+      for (let c = 0; c < gridSize; c++) {
         const cell = document.createElement('td');
-        cell.textContent = puzzleData[i][j];
-        cell.dataset.row = i;
-        cell.dataset.col = j;
+        cell.textContent = grid[r][c];
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+        rowEl.appendChild(cell);
+
         cell.addEventListener('click', () => {
           cell.classList.toggle('selected');
           checkWords();
         });
-        row.appendChild(cell);
       }
-      puzzle.appendChild(row);
+      puzzleElement.appendChild(rowEl);
     }
 
     function checkWords() {
-      const selected = document.querySelectorAll('td.selected');
-      const grid = Array.from({ length: 9 }, () => Array(9).fill(''));
-      selected.forEach(cell => {
+      const selectedCells = document.querySelectorAll('td.selected');
+      const tempGrid = Array.from({ length: gridSize }, () =>
+        Array.from({ length: gridSize }, () => '')
+      );
+
+      selectedCells.forEach(cell => {
         const r = +cell.dataset.row;
         const c = +cell.dataset.col;
-        grid[r][c] = puzzleData[r][c];
+        tempGrid[r][c] = grid[r][c];
       });
 
       const lines = [];
 
-      // Gather lines (horizontal, vertical, diagonal)
-      for (let i = 0; i < 9; i++) {
-        lines.push(grid[i].join('')); // rows
-        lines.push(grid.map(row => row[i]).join('')); // cols
+      for (let i = 0; i < gridSize; i++) {
+        lines.push(tempGrid[i].join('')); // row
+        lines.push(tempGrid.map(row => row[i]).join('')); // column
       }
 
-      // Diagonals (limited version)
-      lines.push(grid.map((r, i) => r[i]).join(''));
-      lines.push(grid.map((r, i) => r[8 - i]).join(''));
+      // Simple diagonals
+      let diag1 = '', diag2 = '';
+      for (let i = 0; i < gridSize; i++) {
+        diag1 += tempGrid[i][i];
+        diag2 += tempGrid[i][gridSize - 1 - i];
+      }
+      lines.push(diag1, diag2);
 
-      // Check for each word
-      wordsToFind.forEach(word => {
-        if (!foundWords.includes(word)) {
+      words.forEach(word => {
+        if (!foundWords.has(word)) {
           for (const line of lines) {
             if (line.includes(word)) {
-              foundWords.push(word);
+              foundWords.add(word);
               break;
             }
           }
         }
       });
 
-      if (foundWords.length === wordsToFind.length) {
+      if (foundWords.size === words.length) {
         document.getElementById('popup').style.display = 'block';
       }
     }
