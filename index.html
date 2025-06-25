@@ -75,13 +75,13 @@
 </head>
 <body>
 
-  <h1>FIND 5 WORDS</h1>
+  <h1>FIND 6 WORDS</h1>
   <table id="puzzle"></table>
   <div class="popup" id="popup">💌 Happy 28th monthsary my cutu ❤️</div>
 
   <script>
     const gridSize = 12;
-    const words = ['life', 'cutu', 'jaan', 'everything', 'bachcha'];
+    const words = ['life', 'cutu', 'jaan', 'everything', 'bachcha', 'baby'];
     const foundWords = new Set();
     const puzzleElement = document.getElementById('puzzle');
 
@@ -115,7 +115,7 @@
     // Place all words
     words.forEach(placeWord);
 
-    // Fill the rest with random letters
+    // Fill remaining spaces
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     for (let r = 0; r < gridSize; r++) {
       for (let c = 0; c < gridSize; c++) {
@@ -125,7 +125,7 @@
       }
     }
 
-    // Render grid
+    // Render table
     for (let r = 0; r < gridSize; r++) {
       const rowEl = document.createElement('tr');
       for (let c = 0; c < gridSize; c++) {
@@ -143,6 +143,7 @@
       puzzleElement.appendChild(rowEl);
     }
 
+    // Check selected letters against word list
     function checkWords() {
       const selectedCells = document.querySelectorAll('td.selected');
       const tempGrid = Array.from({ length: gridSize }, () =>
@@ -158,11 +159,11 @@
       const lines = [];
 
       for (let i = 0; i < gridSize; i++) {
-        lines.push(tempGrid[i].join('')); // row
-        lines.push(tempGrid.map(row => row[i]).join('')); // column
+        lines.push(tempGrid[i].join('')); // horizontal
+        lines.push(tempGrid.map(row => row[i]).join('')); // vertical
       }
 
-      // Simple diagonals
+      // Diagonal (simplified)
       let diag1 = '', diag2 = '';
       for (let i = 0; i < gridSize; i++) {
         diag1 += tempGrid[i][i];
