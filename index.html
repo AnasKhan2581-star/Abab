@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Monthsary!</title>
+  <style>
+    body {
+      background-color: white;
+      font-family: 'Arial', sans-serif;
+      color: #8B008B; /* Dark Magenta */
+      text-align: center;
+      padding: 30px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #8B008B;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+    td {
+      border: 1px solid #8B008B;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+    td.selected {
+      background-color: #8B008B;
+      color: white;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff0f5;
+      color: #8B008B;
+      padding: 30px;
+      border: 3px solid #8B008B;
+      border-radius: 15px;
+      font-size: 20px;
+      z-index: 1000;
+      box-shadow: 0 0 15px #8B008B55;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>FIND 5 WORDS</h1>
+  <table id="puzzle"></table>
+
+  <div class="popup" id="popup">
+    💌 Happy 28th monthsary my cutu ❤️
+  </div>
+
+  <script>
+    const puzzleData = [
+      ['b','a','c','h','c','h','a','x','x'],
+      ['x','x','x','x','x','x','x','x','x'],
+      ['x','x','x','x','x','x','x','x','x'],
+      ['x','x','x','x','x','x','x','x','x'],
+      ['l','i','f','e','x','x','x','x','x'],
+      ['x','x','x','x','x','x','x','x','x'],
+      ['x','x','c','u','t','u','x','x','x'],
+      ['x','x','x','x','x','x','j','a','a'],
+      ['x','x','x','x','x','x','x','x','n']
+    ];
+
+    const wordsToFind = ["life", "cutu", "jaan", "everything", "bachcha"];
+    let foundWords = [];
+
+    const puzzle = document.getElementById('puzzle');
+
+    // Render puzzle
+    for (let i = 0; i < 9; i++) {
+      const row = document.createElement('tr');
+      for (let j = 0; j < 9; j++) {
+        const cell = document.createElement('td');
+        cell.textContent = puzzleData[i][j];
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        cell.addEventListener('click', () => {
+          cell.classList.toggle('selected');
+          checkWords();
+        });
+        row.appendChild(cell);
+      }
+      puzzle.appendChild(row);
+    }
+
+    function checkWords() {
+      const selected = document.querySelectorAll('td.selected');
+      const grid = Array.from({ length: 9 }, () => Array(9).fill(''));
+      selected.forEach(cell => {
+        const r = +cell.dataset.row;
+        const c = +cell.dataset.col;
+        grid[r][c] = puzzleData[r][c];
+      });
+
+      const lines = [];
+
+      // Gather lines (horizontal, vertical, diagonal)
+      for (let i = 0; i < 9; i++) {
+        lines.push(grid[i].join('')); // rows
+        lines.push(grid.map(row => row[i]).join('')); // cols
+      }
+
+      // Diagonals (limited version)
+      lines.push(grid.map((r, i) => r[i]).join(''));
+      lines.push(grid.map((r, i) => r[8 - i]).join(''));
+
+      // Check for each word
+      wordsToFind.forEach(word => {
+        if (!foundWords.includes(word)) {
+          for (const line of lines) {
+            if (line.includes(word)) {
+              foundWords.push(word);
+              break;
+            }
+          }
+        }
+      });
+
+      if (foundWords.length === wordsToFind.length) {
+        document.getElementById('popup').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
